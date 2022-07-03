@@ -1,0 +1,145 @@
+<!-- app.component.html -->
+<div class="container" style="margin-top: 8%;">
+
+  <h1>Solar Panel fficiency prediction</h1>
+
+  <div class="card">
+    <div class="card-body">
+      <!-- app.component.html -->
+
+      <form>
+        <div class="form-row">
+          <!-- model selection -->
+          <div style="margin-right: 50px;" class="form-group col-md-4">
+            <label for="inputState">Model Name</label>
+            <select (change)="setModel($event.target.value)" id="inputState" class="form-control">
+              <option value="1">kWh Calculator</option>
+              <option value="2">Monthly prediction</option>
+            </select>
+          </div>
+          <ng-container *ngIf="modelNumber === 2">
+          <div class="form-group  col-md-4">
+            <div class="row">
+              <div class="col-md-6">
+                <label for="inputStart">Start Date</label>
+                <input type="date" id="inputStart" (change)="dataStartonChange($event)" />
+              </div>
+
+              <div class="col-md-6">
+                <label for="inputEnd">End Date</label>
+                <input type="date" id="inputEnd" (change)="dataEndonChange($event)" />
+              </div>
+            </div>
+
+          
+          
+          </div>
+      </ng-container>
+        </div>
+          <div class="form-group">
+            <!-- google places api -->
+            <label>Enter address</label>
+            <input type="text" class="form-control" (keydown.enter)="$event.preventDefault()" placeholder="Search Your Location" autocorrect="off" autocapitalize="off" spellcheck="off" type="text" #search>
+        
+            <agm-map [latitude]="latitude" [longitude]="longitude" [zoom]="zoom">
+              <agm-marker [latitude]="latitude" [longitude]="longitude" [markerDraggable]="true"
+                (dragEnd)="markerDragEnd($event)"></agm-marker>
+            </agm-map>
+          
+            <!-- <h5>Address: {{address}}</h5> -->
+            <div>Latitude: {{latitude}}</div>
+            <div>Longitude: {{longitude}}</div>
+          </div> 
+          
+          <ng-container *ngIf="(modelNumber === 1)">
+          <div class="form-row">
+            <div class="form-group col-md-3">
+              <label for="input1">Address</label>
+              <input [ngModelOptions]="{standalone: true}" [(ngModel)]="address" type="text" class="form-control" id="input1">
+            </div>
+            <div class="form-group col-md-3">
+              <label for="input2">Sensor ID</label>
+              <input [ngModelOptions]="{standalone: true}" [(ngModel)]="sensor"  type="number" class="form-control" id="inputPassword4" >
+            </div>
+            <div class="form-group col-md-3">
+              <label for="inputPassword45">Present Qualified</label>
+              <input [ngModelOptions]="{standalone: true}" [(ngModel)]="presentQ" type="number" class="form-control" id="inputPassword45" >
+            </div>
+            <div class="form-group col-md-3">
+              <label for="inputPasswordt">Yearly Sunlight KWH Total</label>
+              <input [ngModelOptions]="{standalone: true}" [(ngModel)]="sunlight" type="number" class="form-control" id="inputPasswordt" >
+            </div>
+          </div>
+  
+          <div class="form-row">
+            <div class="form-group col-md-3">
+              <label for="inputEmail4">Number Of Panels</label>
+              <input [ngModelOptions]="{standalone: true}" [(ngModel)]="numbrOfPannels" type="number" class="form-control" id="inputEmail4" >
+            </div>
+            <div class="form-group col-md-3">
+              <label for="inputPasswordt">KW Total</label>
+              <input [ngModelOptions]="{standalone: true}" [(ngModel)]="kwTotal" type="number" class="form-control" id="inputPasswordt" >
+            </div>
+          </div>
+        </ng-container>
+
+
+        
+        
+        <button type="button" class="btn btn-primary" (click)="predictApi()">Predict</button>
+      </form>
+      
+    </div>
+
+    <!-- validation message -->
+    <div class="container" *ngIf="(modelNumber === 2) && validationFailed">
+      <div class="alert alert-danger" role="alert">
+        Please select valid date range
+      </div>
+    </div>
+    <div class="container" *ngIf="(modelNumber === 1) && validationFailed">
+      <div class="alert alert-danger" role="alert">
+        Please fill all fields
+      </div>
+    </div>
+  </div>
+
+</div>
+<div class="container" *ngIf="isResultSuccess">
+<div class="card">
+  <div class="card-body">
+    <ng-container *ngIf="modelNumber === 2">
+      <div class="container">
+        <h4>Monthly prediction</h4>
+      </div>
+      <table class="table">
+        <thead class="thead-dark">
+          <tr>
+            <th scope="col">#</th>
+            <th scope="col">Date</th>
+            <th scope="col">Value (kWh)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <ng-container *ngFor="let item of model2ResutList; let i = index">
+            <tr>
+              <th scope="row">{{i+1}}</th>
+              <td>{{ item.name | date }}</td>
+              <td>{{ item.value |  number : '1.2-4' }} </td>
+              <!-- <td>@mdo</td> -->
+            </tr>
+          </ng-container>
+          
+        </tbody>
+      </table>
+    </ng-container>
+    <ng-container *ngIf="modelNumber === 1">
+      <h4>kWh Generation : <span class="badge badge-success">{{model1ResutList[0]}}</span></h4>
+    </ng-container>
+
+</div>
+</div>
+</div>
+<div *ngIf="pageLoader" id="preloader" style="background-color: #72767166;">
+  <div id="loader"></div>
+</div>
